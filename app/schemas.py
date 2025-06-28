@@ -1,8 +1,22 @@
 from pydantic import BaseModel
-from typing import Optional, List
+from typing import Optional, List, Literal
 from datetime import datetime
 
-# ✅ مشرف (Admin)
+# =========================
+# ✅ توثيق التوكن (JWT)
+# =========================
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    name: Optional[str] = None
+    store_name: Optional[str] = None
+
+
+# =========================
+# ✅ المشرف (Admin)
+# =========================
+
 class AdminCreate(BaseModel):
     phone: str
     password: str
@@ -18,12 +32,11 @@ class AdminResponse(BaseModel):
     class Config:
         orm_mode = True
 
-# ✅ التوكن (JWT)
-class Token(BaseModel):
-    access_token: str
-    token_type: str = "bearer"
 
+# =========================
 # ✅ المحل (Store)
+# =========================
+
 class StoreBase(BaseModel):
     name: str
     phone: str
@@ -32,6 +45,10 @@ class StoreBase(BaseModel):
 
 class StoreCreate(StoreBase):
     pass
+
+class StoreLogin(BaseModel):
+    phone: str
+    password: str
 
 class StoreResponse(BaseModel):
     id: int
@@ -42,11 +59,11 @@ class StoreResponse(BaseModel):
     class Config:
         orm_mode = True
 
-class StoreLogin(BaseModel):
-    phone: str
-    password: str
 
+# =========================
 # ✅ المندوب (Rider)
+# =========================
+
 class RiderBase(BaseModel):
     name: str
     phone: str
@@ -61,7 +78,11 @@ class RiderResponse(RiderBase):
     class Config:
         orm_mode = True
 
+
+# =========================
 # ✅ الطلب (Order)
+# =========================
+
 class OrderBase(BaseModel):
     customer_name: str
     customer_phone: str
@@ -100,7 +121,11 @@ class OrderResponse(BaseModel):
     class Config:
         orm_mode = True
 
+
+# =========================
 # ✅ الإعلان (Ad)
+# =========================
+
 class AdCreate(BaseModel):
     title: str
     content: str
