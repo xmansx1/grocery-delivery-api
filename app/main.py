@@ -21,8 +21,11 @@ app.add_middleware(
     allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
-    allow_headers=["*"]
+    allow_headers=["*"],
+    expose_headers=["*"],               # ✨ للسماح بعرض الهيدرات
+    max_age=600                         # ⏱️ تحسين التعامل مع preflight
 )
+
 
 # ✅ إنشاء الجداول تلقائيًا
 models.Base.metadata.create_all(bind=engine)
