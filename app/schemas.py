@@ -153,3 +153,6 @@ class AdResponse(BaseModel):
 
     class Config:
         from_attributes = True
+class AssignOrderRequest(BaseModel):
+    rider_id: int
+    amount: float

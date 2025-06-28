@@ -79,3 +79,29 @@ def get_available_riders(
 # ✅ دالة إرسال واتساب (تجريبية)
 def send_whatsapp_message(phone: str, message: str):
     print(f"📤 إرسال واتساب إلى {phone}:\n{message}")
+
+@router.post("/store/assign/{order_id}")
+def assign_order(order_id: int, data: schemas.AssignOrderRequest, db: Session = Depends(get_db), current_store=Depends(get_current_store)):
+    order = db.query(models.Order).filter(models.Order.id == order_id).first()
+    if not order:
+        raise HTTPException(status_code=404, detail="الطلب غير موجود")
+
+    rider = db.query(models.Rider).filter(models.Rider.id == data.rider_id, models.Rider.status == "متاح ✅").first()
+    if not rider:
+        raise HTTPException(status_code=400, detail="المندوب غير متاح")
+
+    # تحديث الطلب
+    order.rider_id = rider.id
+    order.amount = data.amount
+    order.status = "قيد التوصيل"
+    db.commit()
+
+    # توليد روابط واتساب
+    rider_message = f"🚚 طلب جديد\nالعميل: {order.customer_name}\nالجوال: {order.customer_phone}\nالطلب: {order.order_text}\nالمبلغ: {data.amount} ريال\nالموقع: https://maps.google.com/?q={order.lat},{order.lng}"
+    customer_message = f"📦 تم إرسال طلبك للتوصيل وسيتم التواصل معك قريبًا"
+
+    return {
+        "success": True,
+        "rider_whatsapp": f"https://wa.me/{rider.phone}?text={rider_message}",
+        "customer_whatsapp": f"https://wa.me/{order.customer_phone}?text={customer_message}"
+    }
