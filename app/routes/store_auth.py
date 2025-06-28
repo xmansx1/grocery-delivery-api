@@ -32,5 +32,5 @@ def store_login(data: schemas.StoreLogin, db: Session = Depends(get_db)):
     if not store or not pwd_context.verify(data.password, store.password):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="اسم المستخدم أو كلمة المرور غير صحيحة")
 
-    access_token = create_access_token(data={"sub": f"store:{store.id}"})
+    access_token = create_access_token(data={"sub": f"{store.id}", "role": "store"})
     return {"access_token": access_token, "token_type": "bearer"}

@@ -30,6 +30,7 @@ def login_store(data: schemas.AdminLogin, db: Session = Depends(get_db)):
     # ✅ إنشاء التوكن
     to_encode = {
         "sub": str(store.id),
+        "role": "store",
         "exp": datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
         "store_name": store.name
     }
