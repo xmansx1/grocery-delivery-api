@@ -33,11 +33,18 @@ class StoreBase(BaseModel):
 class StoreCreate(StoreBase):
     pass
 
-class StoreResponse(StoreBase):
+class StoreResponse(BaseModel):
     id: int
+    name: str
+    phone: str
+    is_active: bool
 
     class Config:
         orm_mode = True
+
+class StoreLogin(BaseModel):
+    phone: str
+    password: str
 
 # ✅ المندوب (Rider)
 class RiderBase(BaseModel):
@@ -55,7 +62,6 @@ class RiderResponse(RiderBase):
         orm_mode = True
 
 # ✅ الطلب (Order)
-# ✅ الطلب (Order)
 class OrderBase(BaseModel):
     customer_name: str
     customer_phone: str
@@ -63,7 +69,7 @@ class OrderBase(BaseModel):
     notes: Optional[str] = None
     lat: Optional[float] = None
     lng: Optional[float] = None
-    amount: Optional[float] = None  # تعديل الاسم هنا
+    amount: Optional[float] = None
     status: Optional[str] = "جديد"
     store_id: int
     rider_id: Optional[int] = None
@@ -74,7 +80,7 @@ class OrderCreate(OrderBase):
 class OrderUpdate(BaseModel):
     status: Optional[str] = None
     rider_id: Optional[int] = None
-    amount: Optional[float] = None  # تعديل الاسم هنا أيضاً
+    amount: Optional[float] = None
 
 class OrderResponse(BaseModel):
     id: int
@@ -88,42 +94,13 @@ class OrderResponse(BaseModel):
     status: str
     rider_id: Optional[int]
     created_at: datetime
-    rider: Optional[RiderResponse]  # هذا بدل assigned_rider
-
-    class Config:
-        orm_mode = True
-
-
-class OrderCreate(OrderBase):
-    pass
-
-class OrderUpdate(BaseModel):
-    status: Optional[str] = None
-    rider_id: Optional[int] = None
-    total_amount: Optional[float] = None
-
-class OrderResponse(OrderBase):
-    id: int
-    created_at: datetime
+    rider: Optional[RiderResponse]
     store: Optional[StoreResponse]
-    assigned_rider: Optional[RiderResponse]
 
     class Config:
         orm_mode = True
 
-class StoreLogin(BaseModel):
-    username: str
-    password: str
-    
-class StoreResponse(BaseModel):
-    id: int
-    name: str
-    phone: str
-    is_active: bool
-
-    class Config:
-        orm_mode = True
-
+# ✅ الإعلان (Ad)
 class AdCreate(BaseModel):
     title: str
     content: str

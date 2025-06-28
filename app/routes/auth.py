@@ -5,12 +5,12 @@ from jose import jwt
 from datetime import datetime, timedelta
 from typing import Literal
 import os
-from app.schemas import StoreLogin
+from app.schemas import StoreLogin, Token
+from pydantic import BaseModel
+from dotenv import load_dotenv
 
 from app.database import get_db
 from app.models import Admin, Store
-from app.schemas import Token
-from dotenv import load_dotenv
 
 load_dotenv()
 
@@ -33,18 +33,23 @@ def create_access_token(data: dict, expires_delta: timedelta = None):
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
-# ✅ تسجيل الدخول للمشرف أو المحل
+# ✅ نموذج طلب تسجيل الدخول الموحد
+class LoginRequest(BaseModel):
+    phone: str
+    password: str
+    user_type: Literal["admin", "store"]
+
+# ✅ تسجيل الدخول للمشرف أو صاحب المحل
 @router.post("/login", response_model=Token)
-def login(
-    phone: str,
-    password: str,
-    user_type: Literal["admin", "store"],
-    db: Session = Depends(get_db)
-):
+def login(data: LoginRequest, db: Session = Depends(get_db)):
+    phone = data.phone
+    password = data.password
+    user_type = data.user_type
+
     if user_type == "admin":
         user = db.query(Admin).filter(Admin.phone == phone).first()
     elif user_type == "store":
-        user = db.query(Store).filter(Store.name == phone).first()  # نفترض أن "name" هنا يُستخدم لتسجيل دخول المحلات
+        user = db.query(Store).filter(Store.phone == phone).first()
     else:
         raise HTTPException(status_code=400, detail="نوع المستخدم غير صالح")
 
@@ -58,7 +63,8 @@ def login(
     access_token = create_access_token(token_data)
     return {"access_token": access_token, "token_type": "bearer"}
 
-@router.post("/store/login", response_model=Token)
+# ✅ تسجيل دخول صاحب المحل (مسار مخصص)
+@router.post("/store-login", response_model=Token)
 def login_store(data: StoreLogin, db: Session = Depends(get_db)):
     store = db.query(Store).filter(Store.phone == data.phone).first()
     if not store or not pwd_context.verify(data.password, store.password):
