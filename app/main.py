@@ -5,6 +5,7 @@ from . import models
 from .routes import auth, stores, admins, store_auth
 from app.routes import store_orders, dashboard, ads, riders
 from app.routes import public_stores, public_store_login, public_order
+from app.routes import riders
 
 app = FastAPI()
 
