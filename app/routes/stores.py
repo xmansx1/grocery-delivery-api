@@ -132,3 +132,54 @@ store_router = APIRouter(prefix="/store", tags=["Store"])
 @store_router.get("/available-riders")
 def get_available_riders(db: Session = Depends(get_db), store=Depends(get_current_store)):
     return db.query(Rider).filter(Rider.status == "متاح ✅").all()
+
+@store_router.get("/profile")
+def get_store_profile(store=Depends(get_current_store)):
+    return {
+        "id": store.id,
+        "name": store.name,
+        "username": store.username,
+        "phone": store.phone
+    }
+
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
+from pydantic import BaseModel
+from app.database import get_db
+from app.models import Store
+from app.utils.jwt import get_current_store
+from app.utils.hashing import get_password_hash
+
+store_router = APIRouter(prefix="/store", tags=["Store"])
+
+# ✅ جلب بيانات المحل
+@store_router.get("/profile")
+def get_store_profile(store=Depends(get_current_store)):
+    return {
+        "id": store.id,
+        "name": store.name,
+        "phone": store.phone,
+        "is_active": store.is_active
+    }
+
+# ✅ نموذج التحديث
+class StoreUpdate(BaseModel):
+    name: str
+    is_active: bool
+    password: str | None = None
+
+# ✅ تحديث بيانات المحل
+@store_router.put("/update")
+def update_store_settings(
+    payload: StoreUpdate,
+    db: Session = Depends(get_db),
+    store=Depends(get_current_store)
+):
+    store.name = payload.name
+    store.is_active = payload.is_active
+
+    if payload.password:
+        store.hashed_password = get_password_hash(payload.password)
+
+    db.commit()
+    return {"message": "تم تحديث البيانات بنجاح"}

@@ -3,10 +3,27 @@ from fastapi.middleware.cors import CORSMiddleware
 from .database import engine
 from . import models
 
-# ✅ إنشاء التطبيق أولاً
+# ✅ استيراد جميع الراوترات
+from app.routes import (
+    auth,
+    stores,
+    admins,
+    store_auth,
+    store_orders,
+    dashboard,
+    ads,
+    riders,
+    public_stores,
+    public_store_login,
+    public_order,
+    rider_orders,
+    store_assign
+)
+
+# ✅ إنشاء التطبيق
 app = FastAPI()
 
-# ✅ إعداد CORS مباشرة بعد إنشاء app
+# ✅ إعداد CORS
 origins = [
     "https://grocery-delivery-frontend.onrender.com",
     "http://localhost:5500",
@@ -21,18 +38,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ✅ بعدها استدعاء الراوترات
-from .routes import auth, stores, admins, store_auth
-from app.routes import store_orders, dashboard, ads, riders
-from app.routes import public_stores, public_store_login, public_order
-from app.routes import rider_orders, store_assign
-
-# ✅ إنشاء الجداول
+# ✅ إنشاء الجداول من النماذج
 models.Base.metadata.create_all(bind=engine)
 
-# ✅ تضمين الراوترات
+# ✅ تضمين جميع الراوترات
 app.include_router(auth.router)
-app.include_router(stores.router)
+app.include_router(stores.store_router)  # فقط هذا هو الصحيح لتسجيل راوتر المتجر
 app.include_router(admins.router)
 app.include_router(store_auth.router)
 app.include_router(store_orders.router)
@@ -43,8 +54,9 @@ app.include_router(public_stores.router)
 app.include_router(public_store_login.router)
 app.include_router(public_order.router)
 app.include_router(rider_orders.router)
- 
+app.include_router(store_assign.router)
 
+# ✅ نقطة البداية
 @app.get("/")
 def root():
     return {"message": "🚀 API جاهز للعمل!"}
