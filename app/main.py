@@ -4,6 +4,8 @@ from .database import engine
 from . import models
 from app.routes import store_assign
 from app.routes import stores
+from app.routes import admin_orders
+
 # ✅ استيراد جميع الراوترات
 from app.routes import (
     auth,
@@ -57,6 +59,7 @@ app.include_router(public_order.router)
 app.include_router(rider_orders.router)
 app.include_router(store_assign.router)
 app.include_router(stores.router)
+app.include_router(admin_orders.router)
 
 # ✅ نقطة البداية
 @app.get("/")
