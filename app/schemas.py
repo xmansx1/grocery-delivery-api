@@ -118,10 +118,14 @@ class OrderResponse(BaseModel):
     notes: Optional[str]
     lat: Optional[float]
     lng: Optional[float]
-    status: str
     amount: Optional[float]
-    rider_name: Optional[str] = None
+    status: str
     created_at: datetime
+    store_name: Optional[str]
+    rider_name: Optional[str]
+
+    class Config:
+        orm_mode = True
 
 
 model_config = {
