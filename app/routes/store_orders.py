@@ -6,10 +6,12 @@ from app.utils.jwt import get_current_store
 
 router = APIRouter(prefix="/store", tags=["Store Orders"])
 
+
 # ✅ جلب الطلبات الخاصة بالمحل
 @router.get("/orders", response_model=list[schemas.OrderResponse])
 def get_store_orders(db: Session = Depends(get_db), store=Depends(get_current_store)):
     return db.query(models.Order).filter(models.Order.store_id == store.id).order_by(models.Order.created_at.desc()).all()
+
 
 # ✅ تحديث حالة الطلب
 @router.post("/status/{order_id}", response_model=schemas.OrderResponse)
@@ -23,6 +25,7 @@ def update_order_status(order_id: int, payload: dict, db: Session = Depends(get_
     db.refresh(order)
     return order
 
+
 # ✅ إسناد الطلب إلى مندوب + إشعار واتساب
 @router.post("/assign/{order_id}", response_model=schemas.OrderResponse)
 def assign_order_to_rider(order_id: int, payload: dict, db: Session = Depends(get_db), store=Depends(get_current_store)):
@@ -30,7 +33,6 @@ def assign_order_to_rider(order_id: int, payload: dict, db: Session = Depends(ge
     if not order:
         raise HTTPException(status_code=404, detail="الطلب غير موجود")
 
-    # البحث عن المندوب المتاح المحدد
     rider_id = payload.get("rider_id")
     amount = payload.get("amount")
 
@@ -41,7 +43,6 @@ def assign_order_to_rider(order_id: int, payload: dict, db: Session = Depends(ge
     if not rider:
         raise HTTPException(status_code=400, detail="المندوب غير متاح حالياً")
 
-    # تحديث الطلب
     order.status = "خرج للتوصيل"
     order.rider_id = rider.id
     order.amount = amount
@@ -49,7 +50,6 @@ def assign_order_to_rider(order_id: int, payload: dict, db: Session = Depends(ge
     db.commit()
     db.refresh(order)
 
-    # ✅ إشعار المندوب
     send_whatsapp_message(rider.phone, f"""
 🚚 طلب جديد للتوصيل
 رقم الطلب: {order.id}
@@ -59,13 +59,23 @@ def assign_order_to_rider(order_id: int, payload: dict, db: Session = Depends(ge
 الموقع: https://www.google.com/maps?q={order.lat},{order.lng}
 """)
 
-    # ✅ إشعار العميل
     send_whatsapp_message(order.customer_phone, f"""
 📦 تم إسناد طلبك رقم {order.id} إلى مندوب التوصيل، وهو في الطريق إليك الآن.
 """)
 
     return order
 
-# ✅ دالة الإرسال - عدلها لاحقًا لاستخدام Twilio أو روابط واتساب
+
+# ✅ إرجاع المناديب المتاحين فقط
+@router.get("/available-riders")
+def get_available_riders(
+    db: Session = Depends(get_db),
+    current_store=Depends(get_current_store)
+):
+    riders = db.query(models.Rider).filter(models.Rider.status == "متاح ✅").all()
+    return [{"id": r.id, "name": r.name, "phone": r.phone} for r in riders]
+
+
+# ✅ دالة إرسال واتساب (تجريبية)
 def send_whatsapp_message(phone: str, message: str):
     print(f"📤 إرسال واتساب إلى {phone}:\n{message}")
