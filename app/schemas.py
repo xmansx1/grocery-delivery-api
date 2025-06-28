@@ -30,6 +30,7 @@ class AdminResponse(BaseModel):
     phone: str
 
     class Config:
+        # ✅ تم التحديث: orm_mode تم استبداله بـ from_attributes
         from_attributes = True
 
 
@@ -57,7 +58,8 @@ class StoreResponse(BaseModel):
     is_active: bool
 
     class Config:
-        orm_mode = True
+        # ✅ تم التحديث: orm_mode تم استبداله بـ from_attributes
+        from_attributes = True
 
 
 # =========================
@@ -67,7 +69,8 @@ class StoreResponse(BaseModel):
 class RiderBase(BaseModel):
     name: str
     phone: str
-    status: Optional[str] = "متاح ✅"
+    # ✅ تحسين: استخدام Literal لتحديد القيم المسموح بها للحالة
+    status: Optional[Literal["متاح ✅", "مشغول 🔴", "غير متاح ⚪"]] = "متاح ✅"
 
 class RiderCreate(RiderBase):
     pass
@@ -76,7 +79,8 @@ class RiderResponse(RiderBase):
     id: int
 
     class Config:
-        orm_mode = True
+        # ✅ تم التحديث: orm_mode تم استبداله بـ from_attributes
+        from_attributes = True
 
 
 # =========================
@@ -91,7 +95,8 @@ class OrderBase(BaseModel):
     lat: Optional[float] = None
     lng: Optional[float] = None
     amount: Optional[float] = None
-    status: Optional[str] = "جديد"
+    # ✅ تحسين: استخدام Literal لتحديد القيم المسموح بها للحالة
+    status: Optional[Literal["جديد", "قيد التجهيز", "جاهز للاستلام", "في الطريق", "مكتمل", "ملغى"]] = "جديد"
     store_id: int
     rider_id: Optional[int] = None
 
@@ -99,7 +104,8 @@ class OrderCreate(OrderBase):
     pass
 
 class OrderUpdate(BaseModel):
-    status: Optional[str] = None
+    # ✅ تحسين: استخدام Literal لتحديد القيم المسموح بها للحالة
+    status: Optional[Literal["جديد", "قيد التجهيز", "جاهز للاستلام", "في الطريق", "مكتمل", "ملغى"]] = None
     rider_id: Optional[int] = None
     amount: Optional[float] = None
 
@@ -115,11 +121,14 @@ class OrderResponse(BaseModel):
     status: str
     rider_id: Optional[int]
     created_at: datetime
+    # ملاحظة: تأكد أن RiderResponse و StoreResponse تحتويان على from_attributes = True
+    # وإلا فإن تضمينهما هنا سيسبب مشاكل إذا كانت تستقبل بيانات ORM
     rider: Optional[RiderResponse]
     store: Optional[StoreResponse]
 
     class Config:
-        orm_mode = True
+        # ✅ تم التحديث: orm_mode تم استبداله بـ from_attributes
+        from_attributes = True
 
 
 # =========================
@@ -139,4 +148,5 @@ class AdResponse(BaseModel):
     created_at: datetime
 
     class Config:
-        orm_mode = True
+        # ✅ تم التحديث: orm_mode تم استبداله بـ from_attributes
+        from_attributes = True
