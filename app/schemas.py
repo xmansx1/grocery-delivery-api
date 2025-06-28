@@ -66,7 +66,7 @@ class RiderBase(BaseModel):
     status: Optional[Literal["متاح ✅", "مشغول ⏳", "موقوف ⛔️"]] = "متاح ✅"
 
 class RiderCreate(RiderBase):
-    pass
+    password: str 
 
 class RiderResponse(RiderBase):
     id: int
