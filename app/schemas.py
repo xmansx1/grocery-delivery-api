@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from typing import Optional, List, Literal
 from datetime import datetime
+from datetime import datetime
 
 # =========================
 # ✅ توثيق التوكن (JWT)
@@ -126,8 +127,7 @@ class OrderResponse(BaseModel):
     status: str
     amount: Optional[float]
     rider_name: Optional[str] = None  # ✅ من العلاقة
-    created_at: str  # 👍 يفضل تحويله إلى datetime بدل str لاحقًا لو أردت تنسيق أفضل
-
+    created_at:  datetime
     class Config:
         orm_mode = True
 
