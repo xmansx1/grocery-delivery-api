@@ -19,15 +19,12 @@ class StatusPayload(BaseModel):
 # ✅ تنسيق رقم الجوال
 def format_phone_number(phone: str) -> str:
     phone = phone.strip().replace(" ", "").replace("-", "").replace("+", "")
-    
     if phone.startswith("0") and len(phone) == 10:
-        # 0541234567 => 966541234567
         return "966" + phone[1:]
-    
-    if phone.startswith("966") and len(phone) == 12:
+    elif phone.startswith("966") and len(phone) == 12:
         return phone
-
-    raise ValueError("📵 رقم الجوال غير صالح، تأكد أنه يبدأ بـ 05 أو يحتوي على 966")
+    else:
+        raise ValueError("📵 رقم الجوال غير صالح")
 
 # ✅ إسناد الطلب إلى مندوب
 @router.post("/assign/{order_id}")
@@ -68,21 +65,18 @@ def assign_order_to_rider(
         f"📍 الموقع: {location_link}\n"
         f"🔢 رقم الطلب: {order.id}"
     )
-    whatsapp_rider = f"https://wa.me/{rider_phone}?text={quote(msg_rider)}"
-
     msg_customer = (
         f"📦 طلبك من {store.name} في الطريق إليك 🚚\n"
         f"🔢 رقم الطلب: {order.id}"
     )
-    whatsapp_customer = f"https://wa.me/{customer_phone}?text={quote(msg_customer)}"
 
     return {
         "message": "✅ تم إسناد الطلب",
-        "rider_whatsapp": whatsapp_rider,
-        "customer_whatsapp": whatsapp_customer
+        "rider_whatsapp": f"https://wa.me/{rider_phone}?text={quote(msg_rider)}",
+        "customer_whatsapp": f"https://wa.me/{customer_phone}?text={quote(msg_customer)}"
     }
 
-# ✅ تحديث حالة الطلب (مثل: قيد التجهيز)
+# ✅ تحديث حالة الطلب (قيد التجهيز)
 @router.post("/status/{order_id}")
 def update_order_status(
     order_id: int,
