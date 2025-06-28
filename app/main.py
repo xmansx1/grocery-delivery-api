@@ -38,3 +38,22 @@ app.include_router(ads.router)
 @app.get("/")
 def root():
     return {"message": "🚀 API جاهز للعمل!"}
+
+from fastapi import Request, Response
+
+@app.middleware("http")
+async def custom_cors_middleware(request: Request, call_next):
+    if request.method == "OPTIONS":
+        return Response(status_code=204, headers={
+            "Access-Control-Allow-Origin": "https://grocery-delivery-frontend.onrender.com",
+            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+            "Access-Control-Allow-Headers": "*",
+            "Access-Control-Allow-Credentials": "true"
+        })
+
+    response = await call_next(request)
+    response.headers["Access-Control-Allow-Origin"] = "https://grocery-delivery-frontend.onrender.com"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+    response.headers["Access-Control-Allow-Headers"] = "*"
+    response.headers["Access-Control-Allow-Credentials"] = "true"
+    return response
