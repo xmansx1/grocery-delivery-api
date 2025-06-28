@@ -10,7 +10,16 @@ router = APIRouter(
 
 @router.post("/order")
 def create_public_order(order: schemas.OrderCreate, db: Session = Depends(get_db)):
-    new_order = models.Order(**order.model_dump())
+    new_order = models.Order(
+        customer_name=order.customer_name,
+        customer_phone=order.customer_phone,
+        store_id=order.store_id,
+        order_text=order.order_text,
+        notes=order.notes,
+        lat=order.lat,
+        lng=order.lng,
+        amount=order.amount  # ✅ تمرير القيمة إذا كانت موجودة
+    )
     db.add(new_order)
     db.commit()
     db.refresh(new_order)

@@ -90,6 +90,18 @@ class OrderBase(BaseModel):
     store_id: int
     rider_id: Optional[int] = None
 
+from pydantic import BaseModel
+from typing import Optional
+
+class OrderCreate(BaseModel):
+    customer_name: str
+    customer_phone: str
+    store_id: int
+    order_text: str
+    notes: Optional[str] = None
+    lat: Optional[float] = None
+    lng: Optional[float] = None
+ 
 class OrderCreate(OrderBase):
     pass
 
