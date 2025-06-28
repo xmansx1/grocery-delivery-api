@@ -22,12 +22,20 @@ class StatusPayload(BaseModel):
 # ✅ تنسيق رقم الجوال ليتوافق مع واتساب (966...)
 def format_phone_number(phone: str) -> str:
     phone = phone.strip().replace(" ", "").replace("-", "").replace("+", "")
-    if phone.startswith("0") and len(phone) == 10:
+    
+    # ٠٥xxxxxxxx → 9665xxxxxxxx
+    if phone.startswith("05") and len(phone) == 10:
         return "966" + phone[1:]
+    
+    # ٥xxxxxxxx → 9665xxxxxxxx
+    elif phone.startswith("5") and len(phone) == 9:
+        return "966" + phone
+
+    # بالفعل بصيغة 966
     elif phone.startswith("966") and len(phone) == 12:
         return phone
-    else:
-        raise ValueError("📵 رقم الجوال غير صالح")
+
+    raise ValueError("📵 رقم الجوال غير صالح")
 
 
 # ✅ إسناد الطلب إلى مندوب
