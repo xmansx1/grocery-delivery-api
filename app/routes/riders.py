@@ -17,7 +17,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 def create_rider(data: schemas.RiderCreate, db: Session = Depends(get_db), admin=Depends(get_current_admin)):
     existing = db.query(models.Rider).filter(models.Rider.phone == data.phone).first()
     if existing:
-        raise HTTPException(status_code=400, detail="رقم الجوال مستخدم بالفعل")
+        raise HTTPException(status_code=400, detail="❌ رقم الجوال مستخدم من قبل مندوب آخر")
 
     hashed_password = pwd_context.hash(data.password)
 
