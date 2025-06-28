@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .database import engine
 from . import models
+from app.routes import store_assign
 
 # ✅ استيراد جميع الراوترات
 from app.routes import (

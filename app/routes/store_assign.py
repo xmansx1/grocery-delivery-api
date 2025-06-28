@@ -7,19 +7,16 @@ from app.database import get_db
 from app.models import Order, Rider
 from app.utils.jwt import get_current_store
 
-store_router = APIRouter(prefix="/store", tags=["Store"])
-
+router = APIRouter(prefix="/store", tags=["Store"])
 
 class AssignPayload(BaseModel):
     amount: float
     rider_id: int
 
-
 class StatusPayload(BaseModel):
     status: str
 
-
-# ✅ دالة تنسيق رقم الجوال
+# ✅ تنسيق رقم الجوال
 def format_phone_number(phone: str) -> str:
     phone = phone.strip().replace(" ", "").replace("-", "")
     if phone.startswith("0") and len(phone) == 10:
@@ -29,33 +26,28 @@ def format_phone_number(phone: str) -> str:
     else:
         raise ValueError("📵 رقم الجوال غير صالح، تأكد أنه يبدأ بـ 0 أو يحتوي على 966")
 
-
 # ✅ إسناد الطلب إلى مندوب
-@store_router.post("/assign/{order_id}")
+@router.post("/assign/{order_id}")
 def assign_order_to_rider(
     order_id: int,
     payload: AssignPayload,
     db: Session = Depends(get_db),
     store=Depends(get_current_store)
 ):
-    amount = payload.amount
-    rider_id = payload.rider_id
-
     order = db.query(Order).filter(Order.id == order_id, Order.store_id == store.id).first()
     if not order:
         raise HTTPException(status_code=404, detail="الطلب غير موجود")
 
-    rider = db.query(Rider).filter(Rider.id == rider_id, Rider.status == "متاح ✅").first()
+    rider = db.query(Rider).filter(Rider.id == payload.rider_id, Rider.status == "متاح ✅").first()
     if not rider:
         raise HTTPException(status_code=404, detail="المندوب غير متاح")
 
     order.rider_id = rider.id
-    order.amount = amount
+    order.amount = payload.amount
     order.status = "قيد التوصيل"
     db.commit()
     db.refresh(order)
 
-    # ✅ توليد رابط الموقع
     location_link = f"https://maps.google.com/?q={order.lat},{order.lng}" if order.lat and order.lng else "غير متوفر"
 
     try:
@@ -82,35 +74,31 @@ def assign_order_to_rider(
     whatsapp_customer = f"https://wa.me/{customer_phone}?text={quote(msg_customer)}"
 
     return {
-        "message": "✅ تم إسناد الطلب وتوليد روابط واتساب",
+        "message": "✅ تم إسناد الطلب",
         "rider_whatsapp": whatsapp_rider,
         "customer_whatsapp": whatsapp_customer
     }
 
-
 # ✅ تحديث حالة الطلب (مثل: قيد التجهيز)
-@store_router.post("/status/{order_id}")
+@router.post("/status/{order_id}")
 def update_order_status(
     order_id: int,
     payload: StatusPayload,
     db: Session = Depends(get_db),
     store=Depends(get_current_store)
 ):
-    status = payload.status
-
     order = db.query(Order).filter(Order.id == order_id, Order.store_id == store.id).first()
     if not order:
         raise HTTPException(status_code=404, detail="الطلب غير موجود")
 
-    order.status = status
+    order.status = payload.status
     db.commit()
 
-    if status == "قيد التجهيز":
+    if payload.status == "قيد التجهيز":
         try:
             phone = format_phone_number(order.customer_phone)
             msg = (
-                f"📦 طلبك من {store.name}\n"
-                f"تم استلامه وجاري التجهيز ✅\n"
+                f"📦 تم استلام طلبك من {store.name} وجاري التجهيز ✅\n"
                 f"🔢 رقم الطلب: {order.id}"
             )
             whatsapp_link = f"https://wa.me/{phone}?text={quote(msg)}"
@@ -121,4 +109,4 @@ def update_order_status(
         except ValueError as e:
             raise HTTPException(status_code=400, detail=str(e))
 
-    return {"message": "✅ تم تحديث الحالة"}
+    return {"message": "✅ تم تحديث الحالة فقط"}
