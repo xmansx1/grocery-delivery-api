@@ -30,10 +30,11 @@ class Rider(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
     phone = Column(String, unique=True, nullable=False)
-    status = Column(String, default="متاح ✅")  # "مشغول ⏳" أو "موقوف ⛔️"
+    password = Column(String, nullable=False)  # ⬅️ أضف هذا السطر
+    status = Column(String, default="متاح ✅")  # متاح / مشغول / موقوف
 
-    # علاقة مع الطلبات
     orders = relationship("Order", back_populates="rider")
+
 
 # ✅ الطلب (Order)
 class Order(Base):

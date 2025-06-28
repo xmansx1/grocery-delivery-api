@@ -4,6 +4,7 @@ from .database import engine
 from . import models
 from .routes import auth, stores, admins, store_auth
 from app.routes import store_orders, dashboard, ads
+from app.routes import riders
 
 app = FastAPI()
 
@@ -36,6 +37,7 @@ app.include_router(store_auth.router)
 app.include_router(store_orders.router)
 app.include_router(dashboard.router)
 app.include_router(ads.router)
+app.include_router(riders.router)
 
 # ✅ مسار فحص الجاهزية (Health Check)
 # هذا المسار مفيد للتحقق من أن الـ API يعمل بشكل صحيح

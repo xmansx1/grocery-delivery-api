@@ -5,7 +5,6 @@ from datetime import datetime
 # =========================
 # ✅ توثيق التوكن (JWT)
 # =========================
-
 class Token(BaseModel):
     access_token: str
     token_type: str = "bearer"
@@ -16,7 +15,6 @@ class Token(BaseModel):
 # =========================
 # ✅ المشرف (Admin)
 # =========================
-
 class AdminCreate(BaseModel):
     phone: str
     password: str
@@ -30,19 +28,17 @@ class AdminResponse(BaseModel):
     phone: str
 
     class Config:
-        # ✅ تم التحديث: orm_mode تم استبداله بـ from_attributes
         from_attributes = True
 
 
 # =========================
 # ✅ المحل (Store)
 # =========================
-
 class StoreBase(BaseModel):
     name: str
     phone: str
     password: str
-    is_active: Optional[bool] = True
+    is_active: bool = True  # ✅ لتفادي خطأ "is_active"
 
 class StoreCreate(StoreBase):
     pass
@@ -58,19 +54,16 @@ class StoreResponse(BaseModel):
     is_active: bool
 
     class Config:
-        # ✅ تم التحديث: orm_mode تم استبداله بـ from_attributes
         from_attributes = True
 
 
 # =========================
 # ✅ المندوب (Rider)
 # =========================
-
 class RiderBase(BaseModel):
     name: str
     phone: str
-    # ✅ تحسين: استخدام Literal لتحديد القيم المسموح بها للحالة
-    status: Optional[Literal["متاح ✅", "مشغول 🔴", "غير متاح ⚪"]] = "متاح ✅"
+    status: Optional[Literal["متاح ✅", "مشغول ⏳", "موقوف ⛔️"]] = "متاح ✅"
 
 class RiderCreate(RiderBase):
     pass
@@ -79,14 +72,12 @@ class RiderResponse(RiderBase):
     id: int
 
     class Config:
-        # ✅ تم التحديث: orm_mode تم استبداله بـ from_attributes
         from_attributes = True
 
 
 # =========================
 # ✅ الطلب (Order)
 # =========================
-
 class OrderBase(BaseModel):
     customer_name: str
     customer_phone: str
@@ -95,7 +86,6 @@ class OrderBase(BaseModel):
     lat: Optional[float] = None
     lng: Optional[float] = None
     amount: Optional[float] = None
-    # ✅ تحسين: استخدام Literal لتحديد القيم المسموح بها للحالة
     status: Optional[Literal["جديد", "قيد التجهيز", "جاهز للاستلام", "في الطريق", "مكتمل", "ملغى"]] = "جديد"
     store_id: int
     rider_id: Optional[int] = None
@@ -104,7 +94,6 @@ class OrderCreate(OrderBase):
     pass
 
 class OrderUpdate(BaseModel):
-    # ✅ تحسين: استخدام Literal لتحديد القيم المسموح بها للحالة
     status: Optional[Literal["جديد", "قيد التجهيز", "جاهز للاستلام", "في الطريق", "مكتمل", "ملغى"]] = None
     rider_id: Optional[int] = None
     amount: Optional[float] = None
@@ -121,20 +110,16 @@ class OrderResponse(BaseModel):
     status: str
     rider_id: Optional[int]
     created_at: datetime
-    # ملاحظة: تأكد أن RiderResponse و StoreResponse تحتويان على from_attributes = True
-    # وإلا فإن تضمينهما هنا سيسبب مشاكل إذا كانت تستقبل بيانات ORM
     rider: Optional[RiderResponse]
     store: Optional[StoreResponse]
 
     class Config:
-        # ✅ تم التحديث: orm_mode تم استبداله بـ from_attributes
         from_attributes = True
 
 
 # =========================
 # ✅ الإعلان (Ad)
 # =========================
-
 class AdCreate(BaseModel):
     title: str
     content: str
@@ -148,5 +133,4 @@ class AdResponse(BaseModel):
     created_at: datetime
 
     class Config:
-        # ✅ تم التحديث: orm_mode تم استبداله بـ from_attributes
         from_attributes = True

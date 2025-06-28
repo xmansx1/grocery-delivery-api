@@ -27,3 +27,4 @@ def create_admin(admin: schemas.AdminCreate, db: Session = Depends(get_db)):
 @router.get("/", response_model=list[schemas.AdminResponse])
 def list_admins(db: Session = Depends(get_db)):
     return db.query(models.Admin).all()
+
