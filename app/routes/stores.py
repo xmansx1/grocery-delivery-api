@@ -120,3 +120,15 @@ def get_store_orders(db: Session = Depends(get_db), store=Depends(get_current_st
             "created_at": order.created_at.isoformat()
         })
     return result
+
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
+from app.database import get_db
+from app.models import Rider
+from app.utils.jwt import get_current_store
+
+store_router = APIRouter(prefix="/store", tags=["Store"])
+
+@store_router.get("/available-riders")
+def get_available_riders(db: Session = Depends(get_db), store=Depends(get_current_store)):
+    return db.query(Rider).filter(Rider.status == "متاح ✅").all()
