@@ -2,6 +2,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .database import engine
 from . import models
+
+# ✅ أضف جميع الراوترات بعد إعداد CORS
 from .routes import auth, stores, admins, store_auth
 from app.routes import store_orders, dashboard, ads, riders
 from app.routes import public_stores, public_store_login, public_order
@@ -9,10 +11,10 @@ from app.routes import rider_orders, store_assign
 
 app = FastAPI()
 
-# ✅ إعداد CORS بشكل آمن وفعّال
+# ✅ إعداد شامل ونهائي لـ CORS
 origins = [
-    "https://grocery-delivery-frontend.onrender.com",  # 🔒 النطاق المنشور على Render
-    "http://localhost:5500",  # للتطوير المحلي
+    "https://grocery-delivery-frontend.onrender.com",  # رابط الواجهة
+    "http://localhost:5500",
     "http://127.0.0.1:5500"
 ]
 
@@ -22,15 +24,14 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
-    expose_headers=["*"],               # ✨ للسماح بعرض الهيدرات
-    max_age=600                         # ⏱️ تحسين التعامل مع preflight
+    expose_headers=["*"],         # ✨ مهم لعرض الهيدرز
+    max_age=600                   # ✨ يقلل ضغط الـ preflight
 )
 
-
-# ✅ إنشاء الجداول تلقائيًا
+# ✅ تفعيل إنشاء الجداول
 models.Base.metadata.create_all(bind=engine)
 
-# ✅ تضمين الراوترات بشكل منظم
+# ✅ تسجيل جميع الراوترات
 app.include_router(auth.router)
 app.include_router(stores.router)
 app.include_router(admins.router)
@@ -45,7 +46,6 @@ app.include_router(public_order.router)
 app.include_router(rider_orders.router)
 app.include_router(store_assign.store_router)
 
-# ✅ نقطة اختبار جاهزية السيرفر
 @app.get("/")
 def root():
     return {"message": "🚀 API جاهز للعمل!"}
