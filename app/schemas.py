@@ -5,6 +5,8 @@ from datetime import datetime
 # =========================
 # ✅ توثيق التوكن (JWT)
 # =========================
+
+
 class Token(BaseModel):
     access_token: str
     token_type: str = "bearer"
@@ -19,9 +21,11 @@ class AdminCreate(BaseModel):
     phone: str
     password: str
 
+
 class AdminLogin(BaseModel):
     phone: str
     password: str
+
 
 class AdminResponse(BaseModel):
     id: int
@@ -40,12 +44,15 @@ class StoreBase(BaseModel):
     password: str
     is_active: bool = True
 
+
 class StoreCreate(StoreBase):
     pass
+
 
 class StoreLogin(BaseModel):
     phone: str
     password: str
+
 
 class StoreResponse(BaseModel):
     id: int
@@ -65,8 +72,10 @@ class RiderBase(BaseModel):
     phone: str
     status: Optional[Literal["متاح ✅", "مشغول ⏳", "موقوف ⛔️"]] = "متاح ✅"
 
+
 class RiderCreate(RiderBase):
-    password: str 
+    password: str
+
 
 class RiderResponse(RiderBase):
     id: int
@@ -90,13 +99,16 @@ class OrderBase(BaseModel):
     store_id: int
     rider_id: Optional[int] = None
 
+
 class OrderCreate(OrderBase):
     pass
+
 
 class OrderUpdate(BaseModel):
     status: Optional[str] = "جديد"
     rider_id: Optional[int] = None
     amount: Optional[float] = None
+
 
 class OrderResponse(BaseModel):
     id: int
@@ -111,8 +123,10 @@ class OrderResponse(BaseModel):
     rider_name: Optional[str] = None
     created_at: datetime
 
-    class Config:
-        orm_mode = True
+
+model_config = {
+    "from_attributes": True
+}
 
 
 # =========================
@@ -130,6 +144,7 @@ class AdCreate(BaseModel):
     title: str
     content: str
     is_active: bool = True
+
 
 class AdResponse(BaseModel):
     id: int
