@@ -6,6 +6,7 @@ from .routes import auth, stores, admins, store_auth
 from app.routes import store_orders, dashboard, ads, riders
 from app.routes import public_stores, public_store_login, public_order
 from app.routes import riders
+from app.routes import rider_orders
 
 app = FastAPI()
 
@@ -37,6 +38,7 @@ app.include_router(riders.router)
 app.include_router(public_stores.router)
 app.include_router(public_store_login.router)
 app.include_router(public_order.router)
+app.include_router(rider_orders.router)
 
 # ✅ نقطة اختبار جاهزية السيرفر
 @app.get("/")

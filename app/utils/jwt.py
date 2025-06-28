@@ -9,6 +9,7 @@ from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models import Admin, Store, Rider # ✅ تأكد من استيراد Rider أيضاً إذا كنت تتحقق من المندوبين
+from app import models
 
 # ✅ هذا السطر يكفي، تأكد أنه في بداية الملف
 load_dotenv() 
@@ -103,6 +104,26 @@ def get_current_store(token: str = Depends(oauth2_scheme), db: Session = Depends
         logger.warning(f"Store with ID {user_id} not found in DB after token validation.")
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="المحل غير موجود")
     return store
+
+def get_current_rider(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> models.Rider:
+    credentials_exception = HTTPException(
+        status_code=401,
+        detail="بيانات الدخول غير صالحة",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        rider_id: int = payload.get("sub")
+        role = payload.get("role")
+        if rider_id is None or role != "rider":
+            raise credentials_exception
+    except JWTError:
+        raise credentials_exception
+    rider = db.query(models.Rider).filter(models.Rider.id == rider_id).first()
+    if rider is None:
+        raise credentials_exception
+    return rider
+
 
 # ✅ يمكنك إضافة دالة مشابهة لـ get_current_rider إذا كنت تستخدم توكنات للمندوبين
 # def get_current_rider(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> Rider:
