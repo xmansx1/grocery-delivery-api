@@ -5,8 +5,6 @@ from app import models, schemas
 from app.database import get_db
 from app.utils.jwt import get_current_rider
 
-router = APIRouter()
-
 rider_router = APIRouter(prefix="/rider", tags=["Rider Orders"])
 
 # ✅ جلب الطلبات الخاصة بالمندوب الحالي
@@ -41,13 +39,10 @@ def update_order_status(
     return order
 
 # ✅ عدد الطلبات التي تم توصيلها
-@rider_router.get("/orders/delivered-count")
-def delivered_count(
-    db: Session = Depends(get_db),
-    rider=Depends(get_current_rider)
-):
+@rider_router.get("/delivered-count")
+def delivered_count(db: Session = Depends(get_db), rider=Depends(get_current_rider)):
     count = db.query(models.Order).filter(
         models.Order.rider_id == rider.id,
         models.Order.status == "تم التوصيل"
     ).count()
-    return {"delivered": count}
+    return {"count": count}

@@ -1,7 +1,6 @@
 from pydantic import BaseModel
 from typing import Optional, List, Literal
 from datetime import datetime
-from datetime import datetime
 
 # =========================
 # ✅ توثيق التوكن (JWT)
@@ -39,7 +38,7 @@ class StoreBase(BaseModel):
     name: str
     phone: str
     password: str
-    is_active: bool = True  # ✅ لتفادي خطأ "is_active"
+    is_active: bool = True
 
 class StoreCreate(StoreBase):
     pass
@@ -87,32 +86,15 @@ class OrderBase(BaseModel):
     lat: Optional[float] = None
     lng: Optional[float] = None
     amount: Optional[float] = None
-    status: Optional[Literal["جديد", "قيد التجهيز", "جاهز للاستلام", "في الطريق", "مكتمل", "ملغى"]] = "جديد"
+    status: Optional[str] = "جديد"
     store_id: int
     rider_id: Optional[int] = None
 
 class OrderCreate(OrderBase):
     pass
 
-# في ملف schemas.py
-from typing import Optional
-from pydantic import BaseModel
-
-class OrderCreate(BaseModel):
-    customer_name: str
-    customer_phone: str
-    order_text: str
-    notes: Optional[str] = None
-    lat: Optional[float] = None
-    lng: Optional[float] = None
-    store_id: int
-    status: Optional[str] = "جديد"  # ✅ أضف هذا السطر لتفادي الخطأ
-
-
-
-
 class OrderUpdate(BaseModel):
-    status: Optional[Literal["جديد", "قيد التجهيز", "خرج للتوصيل", "تم التوصيل", "تم الإلغاء"]] = "جديد"
+    status: Optional[str] = "جديد"
     rider_id: Optional[int] = None
     amount: Optional[float] = None
 
@@ -126,14 +108,19 @@ class OrderResponse(BaseModel):
     lng: Optional[float]
     status: str
     amount: Optional[float]
-    rider_name: Optional[str] = None  # ✅ من العلاقة
-    created_at:  datetime
+    rider_name: Optional[str] = None
+    created_at: datetime
+
     class Config:
         orm_mode = True
 
 
-    class Config:
-        orm_mode = True
+# =========================
+# ✅ الإسناد إلى مندوب
+# =========================
+class AssignOrderRequest(BaseModel):
+    rider_id: int
+    amount: float
 
 
 # =========================
@@ -153,6 +140,3 @@ class AdResponse(BaseModel):
 
     class Config:
         from_attributes = True
-class AssignOrderRequest(BaseModel):
-    rider_id: int
-    amount: float
