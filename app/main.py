@@ -43,7 +43,7 @@ app.include_router(public_stores.router)
 app.include_router(public_store_login.router)
 app.include_router(public_order.router)
 app.include_router(rider_orders.router)
-app.include_router(store_assign.store_router)
+ 
 
 @app.get("/")
 def root():

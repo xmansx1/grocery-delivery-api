@@ -22,6 +22,13 @@ def update_order_status(order_id: int, payload: dict, db: Session = Depends(get_
     db.refresh(order)
     return order
 
+# ✅ دالة المساعدة لإسناد الطلب
+def assign_order_logic(order: models.Order, rider: models.Rider, amount: float):
+    order.rider_id = rider.id
+    order.amount = amount
+    order.status = "قيد التوصيل"
+    return order
+
 # ✅ إسناد الطلب إلى مندوب + توليد روابط واتساب
 @router.post("/assign/{order_id}")
 def assign_order_to_rider(
@@ -38,9 +45,7 @@ def assign_order_to_rider(
     if not rider:
         raise HTTPException(status_code=400, detail="المندوب غير متاح حالياً")
 
-    order.rider_id = rider.id
-    order.amount = data.amount
-    order.status = "قيد التوصيل"
+    assign_order_logic(order, rider, data.amount)
     db.commit()
 
     # روابط واتساب
@@ -53,12 +58,22 @@ def assign_order_to_rider(
         "customer_whatsapp": f"https://wa.me/{order.customer_phone}?text={customer_message}"
     }
 
+# ✅ Alias بديل لقبول الطلبات من /orders/{id}/assign
+@router.post("/orders/{order_id}/assign")
+def alias_assign_order(
+    order_id: int,
+    data: schemas.AssignOrderRequest,
+    db: Session = Depends(get_db),
+    store=Depends(get_current_store)
+):
+    return assign_order_to_rider(order_id, data, db, store)
+
 # ✅ جلب المناديب المتاحين فقط
 @router.get("/available-riders")
 def get_available_riders(db: Session = Depends(get_db), store=Depends(get_current_store)):
     riders = db.query(models.Rider).filter(models.Rider.status == "متاح ✅").all()
     return [{"id": r.id, "name": r.name, "phone": r.phone} for r in riders]
 
-# ✅ دالة إرسال واتساب (اختيارية إذا كنت ستستخدمها داخليًا فقط)
+# ✅ دالة إرسال واتساب (اختيارية)
 def send_whatsapp_message(phone: str, message: str):
     print(f"📤 إرسال واتساب إلى {phone}:\n{message}")
