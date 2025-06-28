@@ -123,3 +123,18 @@ class StoreResponse(BaseModel):
 
     class Config:
         orm_mode = True
+
+class AdCreate(BaseModel):
+    title: str
+    content: str
+    is_active: bool = True
+
+class AdResponse(BaseModel):
+    id: int
+    title: str
+    content: str
+    is_active: bool
+    created_at: datetime
+
+    class Config:
+        orm_mode = True

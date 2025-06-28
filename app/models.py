@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, Boolean, ForeignKey, DateTime, Numeric
+from sqlalchemy import Column, Integer, String, Text, Boolean, ForeignKey, DateTime, Numeric, TIMESTAMP
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from .database import Base
@@ -54,3 +54,12 @@ class Order(Base):
 
     store = relationship("Store", back_populates="orders")
     rider = relationship("Rider", back_populates="orders")
+
+class Ad(Base):
+    __tablename__ = "ads"
+
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String(255), nullable=False)
+    content = Column(Text, nullable=False)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(TIMESTAMP, default=datetime.utcnow)
