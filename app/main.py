@@ -4,6 +4,7 @@ from . import models
 from .routes import auth, stores, admins  # ✅ استيراد موحد
 from .routes import store_auth
 from app.routes import store_orders
+from app.routes import dashboard
 
 app = FastAPI()
 
@@ -16,6 +17,7 @@ app.include_router(stores.router)
 app.include_router(admins.router)
 app.include_router(store_auth.router)
 app.include_router(store_orders.router)
+app.include_router(dashboard.router)
 
 # ✅ مسار اختبار
 @app.get("/")
