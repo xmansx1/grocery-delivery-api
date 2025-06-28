@@ -9,7 +9,25 @@ router = APIRouter(prefix="/store", tags=["Store Orders"])
 # ✅ جلب الطلبات الخاصة بالمحل
 @router.get("/orders", response_model=list[schemas.OrderResponse])
 def get_store_orders(db: Session = Depends(get_db), store=Depends(get_current_store)):
-    return db.query(models.Order).filter(models.Order.store_id == store.id).order_by(models.Order.created_at.desc()).all()
+    orders = db.query(models.Order).filter(models.Order.store_id == store.id).order_by(models.Order.created_at.desc()).all()
+    result = []
+
+    for order in orders:
+        result.append({
+            "id": order.id,
+            "customer_name": order.customer_name,
+            "customer_phone": order.customer_phone,
+            "order_text": order.order_text,
+            "notes": order.notes,
+            "lat": float(order.lat) if order.lat else None,
+            "lng": float(order.lng) if order.lng else None,
+            "status": order.status,
+            "amount": float(order.amount) if order.amount else None,
+            "created_at": order.created_at,
+            "rider_name": order.rider.name if order.rider else None  # ✅ هذا هو المفتاح
+        })
+
+    return result
 
 # ✅ تحديث حالة الطلب
 @router.post("/status/{order_id}", response_model=schemas.OrderResponse)
