@@ -8,20 +8,22 @@ from app.routes import store_orders, dashboard, ads
 app = FastAPI()
 
 # ✅ إعداد CORS الرسمي لنطاق الواجهة فقط
+# تأكد تمامًا من أن هذا هو الرابط الدقيق للواجهة الأمامية
 FRONTEND_ORIGIN = "https://grocery-delivery-frontend.onrender.com"
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[FRONTEND_ORIGIN],  # ✅ لا تستخدم ["*"] مع allow_credentials=True
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["*"],  # السماح بجميع طرق HTTP (GET, POST, PUT, DELETE, OPTIONS)
+    allow_headers=["*"],  # السماح بجميع الترويسات في الطلبات
 )
 
 # ✅ إنشاء الجداول من النماذج
+# تأكد أن هذا السطر يتم تنفيذه لإنشاء الجداول في قاعدة البيانات عند بدء التطبيق
 models.Base.metadata.create_all(bind=engine)
 
-# ✅ تسجيل جميع الراوترات
+# ✅ تسجيل جميع الراوترات (نقاط النهاية API)
 app.include_router(auth.router)
 app.include_router(stores.router)
 app.include_router(admins.router)
@@ -30,27 +32,12 @@ app.include_router(store_orders.router)
 app.include_router(dashboard.router)
 app.include_router(ads.router)
 
-# ✅ مسار فحص الجاهزية
+# ✅ مسار فحص الجاهزية (Health Check)
+# هذا المسار مفيد للتحقق من أن الـ API يعمل بشكل صحيح
 @app.get("/")
 def root():
     return {"message": "🚀 API جاهز للعمل!"}
 
-# ✅ Middleware إضافي يدوي لتجاوز مشاكل preflight إذا Render تجاهل إعدادات CORS
-@app.middleware("http")
-async def custom_cors_fallback(request: Request, call_next):
-    # التعامل مع OPTIONS مسبقًا
-    if request.method == "OPTIONS":
-        return Response(status_code=204, headers={
-            "Access-Control-Allow-Origin": FRONTEND_ORIGIN,
-            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-            "Access-Control-Allow-Headers": "*",
-            "Access-Control-Allow-Credentials": "true"
-        })
-
-    # السماح بالهيدر في كل الردود الأخرى
-    response = await call_next(request)
-    response.headers["Access-Control-Allow-Origin"] = FRONTEND_ORIGIN
-    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
-    response.headers["Access-Control-Allow-Headers"] = "*"
-    response.headers["Access-Control-Allow-Credentials"] = "true"
-    return response
+# تم إزالة أو التعليق على middleware اليدوي "custom_cors_fallback"
+# لأن CORSMiddleware من FastAPI يتعامل مع طلبات CORS (بما في ذلك OPTIONS preflight) بشكل صحيح.
+# وجودهما معًا يمكن أن يسبب تضاربًا أو مشكلات في بعض الحالات.
