@@ -7,15 +7,12 @@ from dotenv import load_dotenv
 # ✅ تحميل متغيرات البيئة من ملف .env
 load_dotenv()
 
-# ✅ قراءة الإعدادات من المتغيرات البيئية
-DB_USER = os.getenv("DB_USER")
-DB_PASSWORD = os.getenv("DB_PASSWORD")
-DB_HOST = os.getenv("DB_HOST", "localhost")
-DB_PORT = os.getenv("DB_PORT", "5432")
-DB_NAME = os.getenv("DB_NAME")
+# ✅ قراءة رابط قاعدة البيانات من البيئة
+DATABASE_URL = os.getenv("DATABASE_URL")
 
-# ✅ إعداد رابط الاتصال بقاعدة البيانات
-DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+# ✅ التأكد من وجود الرابط
+if not DATABASE_URL:
+    raise ValueError("❌ DATABASE_URL غير موجود. تأكد من إضافته في ملف .env أو في Render.")
 
 # ✅ إنشاء محرك قاعدة البيانات
 engine = create_engine(DATABASE_URL)
