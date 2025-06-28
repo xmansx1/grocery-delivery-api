@@ -9,14 +9,17 @@ from app.utils.jwt import get_current_store
 
 router = APIRouter(prefix="/store", tags=["Store"])
 
+
 class AssignPayload(BaseModel):
     amount: float
     rider_id: int
 
+
 class StatusPayload(BaseModel):
     status: str
 
-# ✅ تنسيق رقم الجوال
+
+# ✅ تنسيق رقم الجوال ليتوافق مع واتساب (966...)
 def format_phone_number(phone: str) -> str:
     phone = phone.strip().replace(" ", "").replace("-", "").replace("+", "")
     if phone.startswith("0") and len(phone) == 10:
@@ -25,6 +28,7 @@ def format_phone_number(phone: str) -> str:
         return phone
     else:
         raise ValueError("📵 رقم الجوال غير صالح")
+
 
 # ✅ إسناد الطلب إلى مندوب
 @router.post("/assign/{order_id}")
@@ -76,6 +80,7 @@ def assign_order_to_rider(
         "customer_whatsapp": f"https://wa.me/{customer_phone}?text={quote(msg_customer)}"
     }
 
+
 # ✅ تحديث حالة الطلب (قيد التجهيز)
 @router.post("/status/{order_id}")
 def update_order_status(
@@ -91,6 +96,7 @@ def update_order_status(
     order.status = payload.status
     db.commit()
 
+    # ✅ إرسال رسالة واتساب للعميل عند قيد التجهيز
     if payload.status == "قيد التجهيز":
         try:
             phone = format_phone_number(order.customer_phone)
