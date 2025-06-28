@@ -7,25 +7,19 @@ from app.routes import store_orders, dashboard, ads
 
 app = FastAPI()
 
-# ✅ إعداد CORS بشكل رسمي لتطبيق السياسات الصحيحة
-origins = [
-    "https://grocery-delivery-frontend.onrender.com",  # واجهة المستخدم على Render
-    "http://localhost:8000",                           # التطوير المحلي
-    "http://127.0.0.1:5500",                           # ملفات HTML محليًا
-]
-
+# إعداد CORS الرسمي
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,            # يجب أن تكون محددة (ليست "*")
+    allow_origins=["https://grocery-delivery-frontend.onrender.com"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# ✅ إنشاء الجداول تلقائيًا
+# إنشاء الجداول تلقائيًا
 models.Base.metadata.create_all(bind=engine)
 
-# ✅ تسجيل جميع الراوترات
+# تسجيل جميع الراوترات
 app.include_router(auth.router)
 app.include_router(stores.router)
 app.include_router(admins.router)
@@ -34,12 +28,12 @@ app.include_router(store_orders.router)
 app.include_router(dashboard.router)
 app.include_router(ads.router)
 
-# ✅ مسار فحص جاهزية الـ API
+# مسار فحص الجاهزية
 @app.get("/")
 def root():
     return {"message": "🚀 API جاهز للعمل!"}
 
-# ✅ Middleware إضافي يدوي لحل مشاكل preflight (في حال Render تجاهل CORS الرسمي)
+# fallback middleware لحل مشاكل CORS على Render
 @app.middleware("http")
 async def custom_cors_fallback(request: Request, call_next):
     if request.method == "OPTIONS":
