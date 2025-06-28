@@ -28,7 +28,7 @@ def create_order(data: schemas.OrderCreate, db: Session = Depends(get_db)):
         lat=data.lat,
         lng=data.lng,
         store_id=data.store_id,
-        status=data.status or "جديد"
+        status="جديد"  # ✅ ثابتة بدون تعقيد
     )
 
     db.add(new_order)
@@ -36,3 +36,4 @@ def create_order(data: schemas.OrderCreate, db: Session = Depends(get_db)):
     db.refresh(new_order)
 
     return {"message": "✅ تم استلام الطلب بنجاح"}
+

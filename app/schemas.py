@@ -93,18 +93,20 @@ class OrderBase(BaseModel):
 class OrderCreate(OrderBase):
     pass
 
-from pydantic import BaseModel
+# في ملف schemas.py
 from typing import Optional
+from pydantic import BaseModel
 
 class OrderCreate(BaseModel):
     customer_name: str
     customer_phone: str
-    store_id: int
     order_text: str
     notes: Optional[str] = None
     lat: Optional[float] = None
     lng: Optional[float] = None
-    status: Optional[str] = "جديد"
+    store_id: int
+    status: Optional[str] = "جديد"  # ✅ أضف هذا السطر لتفادي الخطأ
+
 
 
 
