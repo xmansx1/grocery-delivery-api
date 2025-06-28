@@ -5,6 +5,7 @@ from . import models
 from .routes import auth, stores, admins, store_auth
 from app.routes import store_orders, dashboard, ads, riders
 from app.routes import public_stores
+from app.routes import public_store_login
 
 app = FastAPI()
 
@@ -34,6 +35,7 @@ app.include_router(dashboard.router)
 app.include_router(ads.router)
 app.include_router(riders.router)
 app.include_router(public_stores.router)
+app.include_router(public_store_login.router)
 
 # ✅ نقطة الفحص
 @app.get("/")
