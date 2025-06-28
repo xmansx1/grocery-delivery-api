@@ -18,13 +18,16 @@ class StatusPayload(BaseModel):
 
 # ✅ تنسيق رقم الجوال
 def format_phone_number(phone: str) -> str:
-    phone = phone.strip().replace(" ", "").replace("-", "")
+    phone = phone.strip().replace(" ", "").replace("-", "").replace("+", "")
+    
     if phone.startswith("0") and len(phone) == 10:
-        return f"966{phone[1:]}"
-    elif phone.startswith("966") and len(phone) == 12:
+        # 0541234567 => 966541234567
+        return "966" + phone[1:]
+    
+    if phone.startswith("966") and len(phone) == 12:
         return phone
-    else:
-        raise ValueError("📵 رقم الجوال غير صالح، تأكد أنه يبدأ بـ 0 أو يحتوي على 966")
+
+    raise ValueError("📵 رقم الجوال غير صالح، تأكد أنه يبدأ بـ 05 أو يحتوي على 966")
 
 # ✅ إسناد الطلب إلى مندوب
 @router.post("/assign/{order_id}")
