@@ -104,7 +104,8 @@ class OrderCreate(BaseModel):
     notes: Optional[str] = None
     lat: Optional[float] = None
     lng: Optional[float] = None
- 
+    status: Optional[str] = "جديد"
+
 
 
 class OrderUpdate(BaseModel):
