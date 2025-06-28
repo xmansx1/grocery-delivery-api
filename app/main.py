@@ -7,13 +7,18 @@ from app.routes import store_orders, dashboard, ads
 
 app = FastAPI()
 
-# ✅ إعداد CORS الرسمي لنطاق الواجهة فقط
-# تأكد تمامًا من أن هذا هو الرابط الدقيق للواجهة الأمامية
-FRONTEND_ORIGIN = "https://grocery-delivery-frontend.onrender.com"
-
+# ✅ إعداد CORS الرسمي لنطاقات الواجهة الأمامية
+# تم تحديث allow_origins لتشمل روابط التطوير المحلية و رابط الواجهة الأمامية المنشورة.
+# هذا يحل مشكلة CORS عند الاتصال من البيئة المحلية.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[FRONTEND_ORIGIN],  # ✅ لا تستخدم ["*"] مع allow_credentials=True
+    allow_origins=[
+        "https://grocery-delivery-frontend.onrender.com",  # رابط الواجهة الأمامية المنشورة على Render
+        "http://127.0.0.1:5500",  # رابط التطوير المحلي (غالباً Live Server)
+        "http://localhost:5500",   # رابط localhost للتطوير المحلي أيضاً
+        "http://127.0.0.1:8000",   # منفذ محلي آخر قد يستخدم للتطوير
+        "http://localhost:8000"    # منفذ localhost آخر قد يستخدم للتطوير
+    ],
     allow_credentials=True,
     allow_methods=["*"],  # السماح بجميع طرق HTTP (GET, POST, PUT, DELETE, OPTIONS)
     allow_headers=["*"],  # السماح بجميع الترويسات في الطلبات

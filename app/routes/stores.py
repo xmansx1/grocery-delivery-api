@@ -1,12 +1,18 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
+from passlib.context import CryptContext # ✅ استيراد CryptContext
 
 from app import models, schemas
 from app.database import get_db
-from app.utils.jwt import get_current_admin
+from app.utils.jwt import get_current_admin # تأكد من أن هذا المسار صحيح
 
 router = APIRouter(prefix="/stores", tags=["Stores"])
+
+# ✅ إعداد تشفير كلمة المرور (نفس الإعداد في auth.py)
+# تأكد أن هذا المتغير هو نفسه المستخدم في auth.py
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
 
 # ✅ إنشاء محل جديد
 @router.post("/", response_model=schemas.StoreResponse)
@@ -15,7 +21,23 @@ def create_store(
     db: Session = Depends(get_db),
     admin=Depends(get_current_admin)
 ):
-    new_store = models.Store(**data.dict())
+    # ✅ الخطوة المفقودة: تجزئة كلمة المرور
+    hashed_password = pwd_context.hash(data.password)
+
+    # ✅ التأكد من عدم تكرار رقم الجوال
+    existing_store = db.query(models.Store).filter(models.Store.phone == data.phone).first()
+    if existing_store:
+        raise HTTPException(status_code=400, detail="رقم الجوال مستخدم بالفعل لمحل آخر")
+    
+    # ✅ إنشاء كائن Store باستخدام كلمة المرور المجزأة
+    # استخدام .copy(update=...) لتجنب تمرير كلمة المرور النصية مباشرة
+    new_store = models.Store(
+        name=data.name,
+        phone=data.phone,
+        password=hashed_password, # ✅ استخدام كلمة المرور المجزأة
+        is_active=data.is_active # تمرير is_active إذا كانت جزءًا من النموذج
+    )
+
     db.add(new_store)
     db.commit()
     db.refresh(new_store)
@@ -33,7 +55,7 @@ def get_stores(
 @router.put("/{store_id}", response_model=schemas.StoreResponse)
 def update_store(
     store_id: int,
-    data: schemas.StoreCreate,
+    data: schemas.StoreCreate, # قد تحتاج لنموذج StoreUpdate إذا كنت لا تريد تحديث كل الحقول
     db: Session = Depends(get_db),
     admin=Depends(get_current_admin)
 ):
@@ -41,7 +63,12 @@ def update_store(
     if not store:
         raise HTTPException(status_code=404, detail="المحل غير موجود")
 
-    for field, value in data.dict().items():
+    # ✅ ملاحظة هامة: إذا كنت تسمح بتحديث كلمة المرور هنا، يجب تجزئتها أيضًا
+    update_data = data.dict(exclude_unset=True) # لجلب الحقول التي تم تعيينها فقط
+    if "password" in update_data and update_data["password"]:
+        update_data["password"] = pwd_context.hash(update_data["password"])
+
+    for field, value in update_data.items():
         setattr(store, field, value)
 
     db.commit()
