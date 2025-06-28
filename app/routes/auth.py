@@ -16,35 +16,37 @@ load_dotenv()
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
-# ✅ إعداد التشفير
+# ✅ إعداد تشفير كلمة المرور
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # ✅ إعداد التوقيع
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24  # 24 ساعة
+ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24  # يوم واحد
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
 
 def create_access_token(data: dict, expires_delta: timedelta = None) -> str:
+    if not SECRET_KEY:
+        raise HTTPException(status_code=500, detail="مفتاح التشفير غير معرف في .env")
     to_encode = data.copy()
     expire = datetime.utcnow() + (expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
-# ✅ نموذج موحد لتسجيل الدخول (مشرف أو محل)
+# ✅ نموذج موحد لتسجيل الدخول للمشرف والمحل
 class LoginRequest(BaseModel):
     phone: str
     password: str
     user_type: Literal["admin", "store"]
 
-# ✅ نموذج لتسجيل دخول المندوب
+# ✅ نموذج تسجيل دخول المندوب
 class RiderLoginRequest(BaseModel):
     phone: str
     password: str
 
-# ✅ تسجيل دخول موحد للمشرف وصاحب المحل
+# ✅ تسجيل دخول المشرف أو صاحب المحل
 @router.post("/login", response_model=Token)
 def login(data: LoginRequest, db: Session = Depends(get_db)):
     if data.user_type == "admin":
@@ -60,13 +62,16 @@ def login(data: LoginRequest, db: Session = Depends(get_db)):
     token_data = {"sub": str(user.id), "role": data.user_type}
     access_token = create_access_token(token_data)
 
+    # ✅ تجهيز الاستجابة بناءً على نوع المستخدم
     response = {
         "access_token": access_token,
         "token_type": "bearer"
     }
 
     if data.user_type == "store":
-        response["store_name"] = user.name  # تأكد أن العمود هو "name" وليس "username"
+        response["store_name"] = user.name
+    elif data.user_type == "admin":
+        response["name"] = "المشرف"
 
     return response
 
@@ -85,4 +90,3 @@ def login_rider(data: RiderLoginRequest, db: Session = Depends(get_db)):
         "token_type": "bearer",
         "name": rider.name
     }
-

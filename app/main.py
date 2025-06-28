@@ -7,7 +7,7 @@ from app.routes import store_orders, dashboard, ads, riders
 from app.routes import public_stores, public_store_login, public_order
 from app.routes import riders
 from app.routes import rider_orders
-
+from app.routes import store_assign
 app = FastAPI()
 
 # ✅ إعداد CORS بشكل احترافي وآمن
@@ -39,7 +39,7 @@ app.include_router(public_stores.router)
 app.include_router(public_store_login.router)
 app.include_router(public_order.router)
 app.include_router(rider_orders.router)
-
+app.include_router(store_assign.store_router)
 # ✅ نقطة اختبار جاهزية السيرفر
 @app.get("/")
 def root():

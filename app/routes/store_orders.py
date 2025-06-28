@@ -11,7 +11,7 @@ router = APIRouter(prefix="/store", tags=["Store Orders"])
 def get_store_orders(db: Session = Depends(get_db), store=Depends(get_current_store)):
     return db.query(models.Order).filter(models.Order.store_id == store.id).order_by(models.Order.created_at.desc()).all()
 
-# ✅ تحديث حالة الطلب (قيد التجهيز، تم الإلغاء، إلخ)
+# ✅ تحديث حالة الطلب
 @router.post("/status/{order_id}", response_model=schemas.OrderResponse)
 def update_order_status(order_id: int, payload: dict, db: Session = Depends(get_db), store=Depends(get_current_store)):
     order = db.query(models.Order).filter(models.Order.id == order_id, models.Order.store_id == store.id).first()
@@ -30,31 +30,42 @@ def assign_order_to_rider(order_id: int, payload: dict, db: Session = Depends(ge
     if not order:
         raise HTTPException(status_code=404, detail="الطلب غير موجود")
 
-    # اختيار أول مندوب متاح
-    rider = db.query(models.Rider).filter(models.Rider.status == "متاح ✅").first()
+    # البحث عن المندوب المتاح المحدد
+    rider_id = payload.get("rider_id")
+    amount = payload.get("amount")
+
+    if not rider_id or not amount:
+        raise HTTPException(status_code=400, detail="يجب تحديد رقم المندوب وقيمة المبلغ")
+
+    rider = db.query(models.Rider).filter(models.Rider.id == rider_id, models.Rider.status == "متاح ✅").first()
     if not rider:
-        raise HTTPException(status_code=400, detail="لا يوجد مندوب متاح حالياً")
+        raise HTTPException(status_code=400, detail="المندوب غير متاح حالياً")
 
     # تحديث الطلب
-    order.status = "قيد التوصيل"
+    order.status = "خرج للتوصيل"
     order.rider_id = rider.id
-    order.amount = payload.get("amount")
+    order.amount = amount
 
     db.commit()
     db.refresh(order)
 
-    # إرسال إشعار واتساب (بشكل مبسط)
+    # ✅ إشعار المندوب
     send_whatsapp_message(rider.phone, f"""
-📦 طلب جديد للتوصيل:
-👤 {order.customer_name}
-📞 {order.customer_phone}
-🧾 {order.order_text}
-💵 {order.amount} ريال
-📍 https://www.google.com/maps?q={order.lat},{order.lng}
+🚚 طلب جديد للتوصيل
+رقم الطلب: {order.id}
+العميل: {order.customer_name}
+الجوال: {order.customer_phone}
+المبلغ المطلوب: {order.amount} ريال
+الموقع: https://www.google.com/maps?q={order.lat},{order.lng}
+""")
+
+    # ✅ إشعار العميل
+    send_whatsapp_message(order.customer_phone, f"""
+📦 تم إسناد طلبك رقم {order.id} إلى مندوب التوصيل، وهو في الطريق إليك الآن.
 """)
 
     return order
 
-# ✅ دالة وهمية للإرسال - عدلها حسب مشروعك
+# ✅ دالة الإرسال - عدلها لاحقًا لاستخدام Twilio أو روابط واتساب
 def send_whatsapp_message(phone: str, message: str):
     print(f"📤 إرسال واتساب إلى {phone}:\n{message}")

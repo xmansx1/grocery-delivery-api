@@ -90,6 +90,9 @@ class OrderBase(BaseModel):
     store_id: int
     rider_id: Optional[int] = None
 
+class OrderCreate(OrderBase):
+    pass
+
 from pydantic import BaseModel
 from typing import Optional
 
@@ -102,11 +105,10 @@ class OrderCreate(BaseModel):
     lat: Optional[float] = None
     lng: Optional[float] = None
  
-class OrderCreate(OrderBase):
-    pass
+
 
 class OrderUpdate(BaseModel):
-    status: Optional[Literal["جديد", "قيد التجهيز", "جاهز للاستلام", "في الطريق", "مكتمل", "ملغى"]] = None
+    status: Optional[Literal["جديد", "قيد التجهيز", "خرج للتوصيل", "تم التوصيل", "تم الإلغاء"]] = "جديد"
     rider_id: Optional[int] = None
     amount: Optional[float] = None
 
@@ -118,15 +120,17 @@ class OrderResponse(BaseModel):
     notes: Optional[str]
     lat: Optional[float]
     lng: Optional[float]
-    amount: Optional[float]
     status: str
-    rider_id: Optional[int]
-    created_at: datetime
-    rider: Optional[RiderResponse]
-    store: Optional[StoreResponse]
+    amount: Optional[float]
+    rider_name: Optional[str] = None  # ✅ من العلاقة
+    created_at: str  # 👍 يفضل تحويله إلى datetime بدل str لاحقًا لو أردت تنسيق أفضل
 
     class Config:
-        from_attributes = True
+        orm_mode = True
+
+
+    class Config:
+        orm_mode = True
 
 
 # =========================
