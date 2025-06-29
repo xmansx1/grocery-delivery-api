@@ -24,14 +24,13 @@ from app.routes import (
 # ✅ إنشاء التطبيق
 app = FastAPI()
 
-# ✅ إعداد قائمة النطاقات المسموحة لـ CORS
+# ✅ إعداد CORS بشكل سليم
 origins = [
     "https://grocery-delivery-frontend.onrender.com",
     "http://localhost:5500",
     "http://127.0.0.1:5500"
 ]
 
-# ✅ إعداد CORS قبل تسجيل أي راوتر
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -40,12 +39,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ✅ إنشاء الجداول من النماذج
+# ✅ إنشاء الجداول
 models.Base.metadata.create_all(bind=engine)
 
-# ✅ تسجيل جميع الراوترات (بدون تكرار)
+# ✅ تسجيل الراوترات
 app.include_router(auth.router)
-app.include_router(stores.store_router)       # 📌 router الخاص بصفحة المتجر
+app.include_router(stores.store_router)
 app.include_router(admins.router)
 app.include_router(store_auth.router)
 app.include_router(store_orders.router)
