@@ -4,17 +4,17 @@ from .database import engine
 from . import models
 
 from app.routes import (
-    auth, stores, admins, store_auth, store_orders, dashboard, ads,
-    riders, public_stores, public_store_login, public_order,
-    rider_orders, store_assign, admin_orders
+    auth, stores, admins, store_auth, store_orders,
+    dashboard, ads, riders, public_stores, public_store_login,
+    public_order, rider_orders, store_assign, admin_orders
 )
 
 app = FastAPI()
 
-# ✅ هذا هو الجزء المهم: السماح للفرونتند بالوصول
+# 🔐 السماح لفرونت اندك بالوصول
 origins = [
-    "https://grocery-delivery-frontend.onrender.com",  # موقعك المنشور
-    "http://localhost:5500",  # للتجريب المحلي
+    "https://grocery-delivery-frontend.onrender.com",
+    "http://localhost:5500",
     "http://127.0.0.1:5500"
 ]
 
@@ -26,10 +26,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ✅ إنشاء الجداول
+# 📚 إنشاء الجداول
 models.Base.metadata.create_all(bind=engine)
 
-# ✅ تسجيل كل الراوترات
+# 📢 تسجيل الراوترات **بعد** إعداد CORS
 app.include_router(auth.router)
 app.include_router(stores.store_router)
 app.include_router(admins.router)
