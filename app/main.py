@@ -9,9 +9,10 @@ from app.routes import (
     public_order, rider_orders, store_assign, admin_orders
 )
 
+# ✅ إنشاء التطبيق
 app = FastAPI()
 
-# 🔐 السماح لفرونت اندك بالوصول
+# ✅ إعداد CORS — تأكد أن هذا القسم قبل أي include_router
 origins = [
     "https://grocery-delivery-frontend.onrender.com",
     "http://localhost:5500",
@@ -26,10 +27,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 📚 إنشاء الجداول
+# ✅ إنشاء الجداول من النماذج
 models.Base.metadata.create_all(bind=engine)
 
-# 📢 تسجيل الراوترات **بعد** إعداد CORS
+# ✅ تسجيل الراوترات بعد CORS
 app.include_router(auth.router)
 app.include_router(stores.store_router)
 app.include_router(admins.router)
@@ -45,6 +46,7 @@ app.include_router(rider_orders.router)
 app.include_router(store_assign.router)
 app.include_router(admin_orders.router)
 
+# ✅ نقطة تحقق بسيطة
 @app.get("/")
 def root():
     return {"message": "🚀 API جاهز للعمل!"}
