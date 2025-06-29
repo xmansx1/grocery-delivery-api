@@ -72,6 +72,8 @@ def get_current_admin(token: str = Depends(oauth2_scheme), db: Session = Depends
         raise HTTPException(status_code=404, detail="المشرف غير موجود")
     return admin
 
+
+
 # ✅ استرجاع صاحب المحل
 def get_current_store(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> Store:
     payload = decode_and_validate_token(token)
