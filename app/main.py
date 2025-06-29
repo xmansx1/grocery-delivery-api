@@ -3,31 +3,18 @@ from fastapi.middleware.cors import CORSMiddleware
 from .database import engine
 from . import models
 
-# ✅ استيراد جميع الراوترات
 from app.routes import (
-    auth,
-    stores,
-    admins,
-    store_auth,
-    store_orders,
-    dashboard,
-    ads,
-    riders,
-    public_stores,
-    public_store_login,
-    public_order,
-    rider_orders,
-    store_assign,
-    admin_orders
+    auth, stores, admins, store_auth, store_orders, dashboard, ads,
+    riders, public_stores, public_store_login, public_order,
+    rider_orders, store_assign, admin_orders
 )
 
-# ✅ إنشاء التطبيق
 app = FastAPI()
 
-# ✅ إعداد CORS بشكل سليم
+# ✅ هذا هو الجزء المهم: السماح للفرونتند بالوصول
 origins = [
-    "https://grocery-delivery-frontend.onrender.com",
-    "http://localhost:5500",
+    "https://grocery-delivery-frontend.onrender.com",  # موقعك المنشور
+    "http://localhost:5500",  # للتجريب المحلي
     "http://127.0.0.1:5500"
 ]
 
@@ -42,7 +29,7 @@ app.add_middleware(
 # ✅ إنشاء الجداول
 models.Base.metadata.create_all(bind=engine)
 
-# ✅ تسجيل الراوترات
+# ✅ تسجيل كل الراوترات
 app.include_router(auth.router)
 app.include_router(stores.store_router)
 app.include_router(admins.router)
@@ -58,7 +45,6 @@ app.include_router(rider_orders.router)
 app.include_router(store_assign.router)
 app.include_router(admin_orders.router)
 
-# ✅ نقطة البداية
 @app.get("/")
 def root():
     return {"message": "🚀 API جاهز للعمل!"}
