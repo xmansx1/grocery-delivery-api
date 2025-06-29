@@ -6,7 +6,6 @@ from datetime import datetime
 # ✅ توثيق التوكن (JWT)
 # =========================
 
-
 class Token(BaseModel):
     access_token: str
     token_type: str = "bearer"
@@ -17,15 +16,14 @@ class Token(BaseModel):
 # =========================
 # ✅ المشرف (Admin)
 # =========================
+
 class AdminCreate(BaseModel):
     phone: str
     password: str
 
-
 class AdminLogin(BaseModel):
     phone: str
     password: str
-
 
 class AdminResponse(BaseModel):
     id: int
@@ -38,21 +36,19 @@ class AdminResponse(BaseModel):
 # =========================
 # ✅ المحل (Store)
 # =========================
+
 class StoreBase(BaseModel):
     name: str
     phone: str
     password: str
     is_active: bool = True
 
-
 class StoreCreate(StoreBase):
     pass
-
 
 class StoreLogin(BaseModel):
     phone: str
     password: str
-
 
 class StoreResponse(BaseModel):
     id: int
@@ -67,18 +63,20 @@ class StoreResponse(BaseModel):
 # =========================
 # ✅ المندوب (Rider)
 # =========================
+
 class RiderBase(BaseModel):
     name: str
     phone: str
-    status: Optional[Literal["متاح ✅", "مشغول ⏳", "موقوف ⛔️"]] = "متاح ✅"
-
+    status: Optional[Literal["متاح", "مشغول", "موقوف"]] = "متاح"
 
 class RiderCreate(RiderBase):
     password: str
 
-
-class RiderResponse(RiderBase):
+class RiderResponse(BaseModel):
     id: int
+    name: str
+    phone: str
+    status: Literal["متاح", "مشغول", "موقوف"]
 
     class Config:
         from_attributes = True
@@ -87,6 +85,7 @@ class RiderResponse(RiderBase):
 # =========================
 # ✅ الطلب (Order)
 # =========================
+
 class OrderBase(BaseModel):
     customer_name: str
     customer_phone: str
@@ -99,16 +98,13 @@ class OrderBase(BaseModel):
     store_id: int
     rider_id: Optional[int] = None
 
-
 class OrderCreate(OrderBase):
     pass
-
 
 class OrderUpdate(BaseModel):
     status: Optional[str] = "جديد"
     rider_id: Optional[int] = None
     amount: Optional[float] = None
-
 
 class OrderResponse(BaseModel):
     id: int
@@ -125,17 +121,13 @@ class OrderResponse(BaseModel):
     rider_name: Optional[str]
 
     class Config:
-        orm_mode = True
-
-
-model_config = {
-    "from_attributes": True
-}
+        from_attributes = True
 
 
 # =========================
 # ✅ الإسناد إلى مندوب
 # =========================
+
 class AssignOrderRequest(BaseModel):
     rider_id: int
     amount: float
@@ -144,11 +136,11 @@ class AssignOrderRequest(BaseModel):
 # =========================
 # ✅ الإعلان (Ad)
 # =========================
+
 class AdCreate(BaseModel):
     title: str
     content: str
     is_active: bool = True
-
 
 class AdResponse(BaseModel):
     id: int
